@@ -252,3 +252,6 @@ echo "Exiting."
 exec >/dev/tty 2>&1
 exit 0
 ;;
+*) echo "Invalid choice. Please select 1, 2, 3, 4, or 5." ;;
+  esac
+done
