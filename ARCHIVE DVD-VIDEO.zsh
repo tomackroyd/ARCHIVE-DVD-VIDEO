@@ -237,20 +237,18 @@ while true; do
     3) create_files_from_iso "false" ;;
     4) create_access_files_only ;;
     5)
-    # ---- Move the trace/log file to the output directory on exit ----
-    if [[ -n "$out_dir" && -d "$out_dir" && -n "$LOGFILE" && -f "$LOGFILE" ]]; then
+      if [[ -n "$out_dir" && -d "$out_dir" && -n "$LOGFILE" && -f "$LOGFILE" ]]; then
         log_basename="${output_dir_name:-trace}-RF.log"
         new_logfile="${out_dir}/${log_basename}"
         mv "$LOGFILE" "$new_logfile"
         echo "Log file moved to: $new_logfile"
-    else
+      else
         echo "Log file not moved (output directory or log file missing)."
-    fi
-    echo "Exiting."
-    exit 0
-    ;;
-  *)
-    echo "Invalid choice. Please select 1, 2, 3, 4, or 5."
-    ;;
-esac
+      fi
+      echo "Exiting."
+      exec >&- 2>/dev/null
+      exit 0
+      ;;
+    *) echo "Invalid choice. Please select 1, 2, 3, 4, or 5." ;;
+  esac
 done
