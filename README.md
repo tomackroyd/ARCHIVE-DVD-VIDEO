@@ -7,21 +7,21 @@ Copy and paste the contents into a text file and save locally as ARCHIVE-DVD-VID
 Make a note of where this is saved.
 
 Install Homebrew by running:
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
 
 Then:
-brew install ffmpeg
-brew install MakeMKV
-brew install jq
-brew install exiftool
-brew install mediainfo
-brew install IINA
-brew install amiaopensource/amiaos
+`brew install ffmpeg`
+`brew install MakeMKV`
+`brew install jq`
+`brew install exiftool`
+`brew install mediainfo`
+`brew install IINA`
+`brew install amiaopensource/amiaos`
 
 Also install Invisor from the App store
 run `brew cleanup` and `brew doctor`
 
-Add `/opt/homebrew/bin` to the new User’s PATH by running "export PATH="/opt/homebrew/bin:$PATH"
+Add `/opt/homebrew/bin` to the new User’s PATH by running `"export PATH="/opt/homebrew/bin:$PATH"`
 
 Run `which ffmpeg`, and  `which jq` to check path is /usr/local/bin
 
