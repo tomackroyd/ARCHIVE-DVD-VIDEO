@@ -155,7 +155,7 @@ for mkv_file in "$out_dir"/*.mkv; do
     continue
   fi
   # Increment by 1, preserving leading zeros
-  new_num=$(printf "%02d" $((10#$orig_num + 1)))
+  new_num=$(printf "%02d" $((10#$orig_num + 2)))
   new_mkv="$out_dir/${output_dir_name}-PM${new_num}.mkv"
   echo "Renaming $mkv_file to $new_mkv"
   mv "$mkv_file" "$new_mkv"
@@ -249,10 +249,10 @@ else
 fi
 
 echo "Exiting."
-
-# Close and clean up the tee process safely
-exit 0
-;;
-*) echo "Invalid choice. Please select 1, 2, 3, 4, or 5." ;;
-  esac
+    exit 0
+    ;;
+  *)
+    echo "Invalid choice. Please select 1, 2, 3, 4, or 5."
+    ;;
+esac
 done
