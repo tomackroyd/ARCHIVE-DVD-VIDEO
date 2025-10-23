@@ -251,7 +251,6 @@ fi
 echo "Exiting."
 
 # Close and clean up the tee process safely
-exec >/dev/tty 2>&1
 exit 0
 ;;
 *) echo "Invalid choice. Please select 1, 2, 3, 4, or 5." ;;
