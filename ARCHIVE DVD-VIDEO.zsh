@@ -175,9 +175,6 @@ create_files_from_iso() {
         [[ -f "$mkv_file" ]] || continue
         base_name=$(basename "$mkv_file" .mkv)
         title_num=$(echo "$base_name" | grep -oE 'PM[0-9]{2}' | sed 's/PM//')
-        json_file="$out_dir/${base_name}.json"
-        echo "Saving JSON metadata for $mkv_file"
-        ffprobe -v quiet -print_format json -show_format -show_streams "$mkv_file" > "$json_file"
         if [[ "$create_access_files" == "true" ]]; then
             output_prefix="$out_dir/${output_dir_name}"
             generate_access_mp4 "$mkv_file" "$title_num" "$output_prefix"
