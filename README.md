@@ -51,3 +51,15 @@ and similarly for makemkvcon:
 `export PATH="/Applications/MakeMKV.app/Contents/MacOS:$PATH"`
 
 Log back in and test
+
+NOTE
+MakeMKV is "free while in beta" but requires a new beta registration key every 1-2 months.
+Get the latest beta key:
+
+Go to the MakeMKV forum beta key thread: https://forum.makemkv.com/forum/viewtopic.php?f=5&t=1053
+Copy the latest key from the first post.
+Enter the key in MakeMKV:
+
+Open the MakeMKV GUI.
+Go to Help > Register (or "Enter registration key").
+Paste the new beta key and apply.
