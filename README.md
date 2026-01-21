@@ -35,7 +35,8 @@ Add `/opt/homebrew/bin` to the new User’s PATH by running `"export PATH="/opt/
 
 Run `which ffmpeg` and  `which jq` to check path is `/usr/local/bin`
 
-Test the script for access to all applications, especially jq and makemkv
+Test the script for access to all applications, especially jq and makemkv.
+
 Copy the path of the .zsh script and run `chmod +x <path>`
 Disk Imaging can now be run on the admin account.
 
