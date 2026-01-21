@@ -10,6 +10,7 @@ Install Homebrew by running:
 `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
 
 Then:
+
 `brew install ffmpeg`
 
 `brew install ddrescue`
@@ -27,7 +28,8 @@ Then:
 `brew install amiaopensource/amiaos`
 
 Also install Invisor from the App store
-run `brew cleanup` and `brew doctor`
+
+Run `brew cleanup` and `brew doctor`
 
 Add `/opt/homebrew/bin` to the new User’s PATH by running `"export PATH="/opt/homebrew/bin:$PATH"`
 
