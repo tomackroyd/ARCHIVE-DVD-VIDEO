@@ -29,6 +29,11 @@ A shell script for creating preservation-quality archival copies of DVD-VIDEO di
 ### Optional Software
 - **jq** - Faster JSON parsing (recommended)
 - **drutil** - Disc ejection (included with macOS)
+- **exiftool** and **mediainfo** - for examining metadata
+- **mediainfo** - Useful for examining metadata
+- **IINA** and **VLC** - for MKV viewing
+- **The AMIA Open Source "amiaos" tap** 
+
 
 ## Installation
 
