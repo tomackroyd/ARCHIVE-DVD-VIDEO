@@ -60,7 +60,7 @@ These tools support a complete archival workflow:
 brew install exiftool mediainfo
 
 # Install AMIA Open Source tools
-brew install amiaopensource/amiaos/amiaos
+brew install amiaopensource/amiaos
 
 # Install video player
 brew install iina
