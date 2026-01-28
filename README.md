@@ -1,6 +1,6 @@
 On an appropriate macOS computer, create a new user account with admin privileges, and log in to that account.
 
-Open the script at https://github.com/tomackroyd/archive-dvd/blob/ddrescue/ARCHIVE%20DVD-VIDEO_ddrescue.zsh
+Open the script at https://github.com/tomackroyd/archive-dvd/blob/ddrescue/ARCHIVE%20DVD-VIDEO_ddrescue_improved.zsh
 
 You will need Tom to log in to this Github account.
 
