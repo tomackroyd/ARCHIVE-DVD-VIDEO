@@ -115,8 +115,9 @@ which makemkvcon  # Should show /Applications/MakeMKV.app/Contents/MacOS/makemkv
 
 This repository includes two script variants:
 
-- **`ARCHIVE-DVD-VIDEO.zsh`** - Bob deinterlacing (doubles frame rate to 60fps)
+- **`ARCHIVE-DVD-VIDEO.zsh`** - Bob deinterlacing (doubles frame rate)
 - **`ARCHIVE-DVD-VIDEO-MEZZANINE.zsh`** - Bob deinterlacing + optional ProRes 422 mezzanine files
+- **`ARCHIVE-DVD-VIDEO-BLEND.zsh`** - same as **`ARCHIVE-DVD-VIDEO.zsh`** but with blend deinterlacing
 
 ### Quick Start
 
