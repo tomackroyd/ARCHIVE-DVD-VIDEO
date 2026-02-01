@@ -5,7 +5,7 @@ Shell scripts for creating preservation-quality archival copies of DVD-VIDEO dis
 ## Features
 
 - **ISO Creation**: Uses ddrescue with 5% safety margin for reliable disk imaging
-- **MKV Extraction**: Extracts all titles ≥15 seconds using MakeMKV
+- **MKV Extraction**: Extracts all titles (greater than 5 seconds long) using MakeMKV
 - **Access Files**: Generates MP4 files with automatic field order detection
 - **Mezzanine Files**: Optional ProRes 422 creation for broadcast/editing workflows (see MEZZANINE variant)
 - **Bob Deinterlacing**: Uses `bwdif=mode=send_field` to preserve original temporal resolution
