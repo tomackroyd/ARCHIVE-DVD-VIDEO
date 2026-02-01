@@ -318,7 +318,7 @@ create_files_from_iso() {
   fi
 
   echo "Extracting titles with MakeMKV..."
-  if ! makemkvcon --minlength=15 mkv iso:"$ISO_PATH" all "$out_dir"; then
+  if ! makemkvcon --minlength=5 mkv iso:"$ISO_PATH" all "$out_dir"; then
     echo "ERROR: MakeMKV failed to extract titles."
     return 1
   fi
