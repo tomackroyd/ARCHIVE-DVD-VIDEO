@@ -504,19 +504,18 @@ Check if blend deinterlacing is more appropriate for your content and use ARCHIV
 
 ## Version Information
 
-**Scripts**:
+**Standard workflow script**:
 - ARCHIVE-DVD-VIDEO.zsh (standard)
-- ARCHIVE-DVD-VIDEO-MEZZANINE.zsh (with ProRes mezzanine)
 
 **Deinterlacing**: Bob (send_field mode, doubles frame rate)
 **Frame Rate**: 50fps output from 25fps interlaced source
 **Dependencies**: ffmpeg, ddrescue, makemkvcon
 **Platform**: macOS 10.15+
 
-## Script Variants
+## Script variants
 
 ### ARCHIVE-DVD-VIDEO-BLEND.zsh
-**Standard workflow script**
+**Standard blend-deinterlace workflow script**
 - ISO creation, MKV extraction, access MP4 generation
 - Blend deinterlacing (25fps progressive from 25fps interlaced source)
 
