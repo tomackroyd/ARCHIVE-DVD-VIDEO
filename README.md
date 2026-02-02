@@ -391,14 +391,13 @@ Check the `.iso.log` file after imaging for any read errors.
 2. Run script → Option 1 (create ISO)
 3. Continue → Option 2 (create MKV + MP4)
 4. Verify output files
-5. Store ISO separately or delete after verification
 
 ### Batch Processing Workflow
 
 **Phase 1: Imaging** (requires admin privileges)
 1. Create ISOs for all discs using Option 1
 2. Name systematically: `CA0001234567`, `CA0001234568`, etc.
-3. Store ISOs in staging directory
+3. Store ISOs in staging directory and pass to Phase 2
 
 **Phase 2: Processing** (can run as standard user)
 1. Use Option 2 to process each ISO
@@ -412,7 +411,7 @@ Check the `.iso.log` file after imaging for any read errors.
 
 ### Storage Guidelines
 
-**Preservation Masters (MKV)**:
+**Preservation Masters (ISO and MKV)**:
 - Store on redundant storage (RAID, cloud backup)
 - Never delete after creating derivatives
 - Consider LTO tape for long-term archival
@@ -430,11 +429,6 @@ Check the `.iso.log` file after imaging for any read errors.
 - Can be regenerated from MKV if lost
 - Lower storage priority than masters
 - Delete and regenerate if quality standards change
-
-**ISOs**:
-- Can delete after successful MKV extraction
-- Retain if you need perfect disc reconstruction
-- Useful for creating physical copies later
 
 ## Troubleshooting
 
