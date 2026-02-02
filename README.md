@@ -475,6 +475,10 @@ echo 'export PATH="/Applications/MakeMKV.app/Contents/MacOS:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 which makemkvcon
 ```
+### "makemkvcon: Sequoia Gatekeeper warning"
+
+**Solution:**
+Troubleshoot at this page: https://forum.makemkv.com/forum/viewtopic.php?t=35350
 
 ### Permission denied with ddrescue
 
