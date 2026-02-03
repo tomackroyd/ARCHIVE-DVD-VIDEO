@@ -506,8 +506,11 @@ Check if blend deinterlacing is more appropriate for your content and use ARCHIV
 - ARCHIVE-DVD-VIDEO.zsh (standard)
 
 **Deinterlacing**: Bob (send_field mode, doubles frame rate)
+
 **Frame Rate**: 50fps output from 25fps interlaced source
+
 **Dependencies**: ffmpeg, ddrescue, makemkvcon
+
 **Platform**: macOS 10.15+
 
 ## Script variants
