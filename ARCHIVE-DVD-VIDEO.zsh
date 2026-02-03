@@ -79,7 +79,7 @@ create_iso() {
   echo -n "Enter output ISO filename (e.g., CA0001234567): "
   read iso_file
   iso_file="${iso_file##*/}"
-  iso_file="${iso_file%.iso}.iso"
+  iso_file="${iso_file%.iso}-O.iso"
   iso_path="$PWD/$iso_file"
 
   # Check if file already exists
