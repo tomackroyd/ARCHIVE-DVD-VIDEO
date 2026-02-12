@@ -6,6 +6,7 @@ Shell scripts for creating preservation-quality archival copies of DVD-VIDEO dis
 
 - **ISO Creation**: Uses ddrescue with 5% safety margin for reliable disk imaging
 - **MKV Extraction**: Extracts all titles (greater than 5 seconds long) using MakeMKV
+- **Extraction Validation**: Automatic duration comparison detects incomplete MakeMKV extractions
 - **Access Files**: Generates MP4 files with automatic field order detection
 - **Mezzanine Files**: Optional ProRes 422 creation for broadcast/editing workflows (see MEZZANINE variant)
 - **Bob Deinterlacing**: Uses `bwdif=mode=send_field` to preserve original temporal resolution
@@ -27,10 +28,15 @@ Shell scripts for creating preservation-quality archival copies of DVD-VIDEO dis
 - **makemkvcon** - DVD title extraction
 - **diskutil** - Disk management (included with macOS)
 
-### Recommended Archival Tools
-These tools are not required for the script to run, but are essential for a complete archival workflow:
+### Optional Software
+These tools are not required for the script to run, but enhance functionality:
 
-- **jq** - Faster JSON parsing (recommended for script)
+- **bc** - Basic calculator for extraction validation (highly recommended)
+- **jq** - Faster JSON parsing for field order detection
+
+### Recommended Archival Tools
+Essential for a complete archival workflow:
+
 - **exiftool** - Extract and analyze file metadata
 - **mediainfo** - Display technical metadata about media files
 - **IINA** - Modern video player for verification (or VLC)
@@ -49,7 +55,7 @@ These tools are not required for the script to run, but are essential for a comp
 ### 2. Install Required Dependencies
 
 ```bash
-brew install ffmpeg ddrescue makemkv jq
+brew install ffmpeg ddrescue makemkv bc jq
 ```
 
 ### 3. Install Archival Tools (Recommended)
@@ -198,11 +204,15 @@ Both scripts present an interactive menu with options for your workflow.
 4. Wait for processing
 
 **What Happens**:
-1. MakeMKV extracts all titles ≥15 seconds to MKV
+1. MakeMKV extracts all titles ≥5 seconds to MKV
 2. Files renamed: `title_t00.mkv` → `FILENAME-PM01.mkv`
-3. Field order detected for each title
-4. Access MP4 created with appropriate deinterlacing
-5. Log file moved to output directory on exit
+3. **Extraction validated**: VOB duration compared with MKV duration
+4. Field order detected for each title
+5. Access MP4 created with appropriate deinterlacing
+6. Log file moved to output directory on exit
+
+**Validation Check**:
+After extraction, the script automatically validates that MakeMKV extracted all content by comparing total VOB duration with total MKV duration. If validation fails (MKVs < 98% of VOB duration), you'll be prompted to investigate. See [VALIDATION-TROUBLESHOOTING.md](VALIDATION-TROUBLESHOOTING.md) for workarounds.
 
 **Output**:
 - `FILENAME-PM01.mkv`, `FILENAME-PM02.mkv`, etc. - Preservation masters
@@ -220,10 +230,12 @@ Both scripts present an interactive menu with options for your workflow.
 - When you only need archival MKVs
 - Saves time when processing multiple discs
 
-Same as Option 2 but skips MP4 generation.
+Same as Option 2 but skips MP4 generation. Includes extraction validation.
 
 **Output**:
 - `FILENAME-PM##.mkv` - Preservation master files only
+
+**Note**: Validation still runs to detect incomplete extractions.
 
 ---
 
@@ -499,6 +511,22 @@ Troubleshoot at this page: https://forum.makemkv.com/forum/viewtopic.php?t=35350
 
 **Solution:**
 Check if blend deinterlacing is more appropriate for your content and use ARCHIVE-DVD-VIDEO-BLEND.zsh
+
+### Extraction validation failed
+
+When you see:
+```
+⚠️  VALIDATION FAILED: Extracted MKVs are significantly shorter than source VOBs!
+```
+
+This means MakeMKV failed to extract all DVD cells. The extracted MKVs are incomplete.
+
+**Solution:**
+See [VALIDATION-TROUBLESHOOTING.md](VALIDATION-TROUBLESHOOTING.md) for detailed workarounds including:
+- Direct ffmpeg extraction from VOBs (recommended)
+- HandBrake CLI as alternative
+- MakeMKV GUI troubleshooting
+- When to report bugs to MakeMKV developers
 
 ## Version Information
 
