@@ -5,7 +5,7 @@
 check_dependencies() {
   local missing_deps=()
   local required_deps=(ffmpeg ffprobe makemkvcon diskutil)
-  local optional_deps=(jq drutil)
+  local optional_deps=(jq drutil bc)
 
   for cmd in "${required_deps[@]}"; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
@@ -213,6 +213,103 @@ generate_access_mp4() {
   echo "Finished processing: $access_file"
 }
 
+validate_extraction() {
+  local iso_path="$1"
+  local mkv_dir="$2"
+
+  echo ""
+  echo "=== Validating Extraction Completeness ==="
+
+  # Check for bc dependency
+  if ! command -v bc >/dev/null 2>&1; then
+    echo "WARNING: 'bc' not found. Skipping duration validation."
+    echo "Install with: brew install bc"
+    return 0
+  fi
+
+  # Mount ISO temporarily to read VOBs
+  local mount_point=$(mktemp -d)
+  echo "Mounting ISO for validation..."
+  if ! hdiutil attach "$iso_path" -mountpoint "$mount_point" -readonly -nobrowse -quiet 2>/dev/null; then
+    echo "WARNING: Could not mount ISO for validation"
+    rmdir "$mount_point" 2>/dev/null
+    return 0
+  fi
+
+  # Get total VOB duration (only main title VOBs: VTS_01_*.VOB, VTS_02_*.VOB, etc.)
+  echo "Analyzing VOB files..."
+  local total_vob_duration=0
+  local vob_count=0
+
+  for vob in "$mount_point"/VIDEO_TS/VTS_*_[1-9].VOB "$mount_point"/VIDEO_TS/VTS_*_[1-9][0-9].VOB; do
+    [[ -f "$vob" ]] || continue
+    local duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$vob" 2>/dev/null)
+    if [[ -n "$duration" && "$duration" != "N/A" ]]; then
+      total_vob_duration=$(echo "$total_vob_duration + $duration" | bc)
+      ((vob_count++))
+    fi
+  done
+
+  # Unmount ISO
+  hdiutil detach "$mount_point" -quiet 2>/dev/null
+  rmdir "$mount_point" 2>/dev/null
+
+  if [[ $vob_count -eq 0 ]]; then
+    echo "WARNING: No VOB files found for validation"
+    return 0
+  fi
+
+  # Get total MKV duration
+  echo "Analyzing extracted MKV files..."
+  local total_mkv_duration=0
+  local mkv_count=0
+
+  for mkv in "$mkv_dir"/*.mkv; do
+    [[ -f "$mkv" ]] || continue
+    local duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$mkv" 2>/dev/null)
+    if [[ -n "$duration" && "$duration" != "N/A" ]]; then
+      total_mkv_duration=$(echo "$total_mkv_duration + $duration" | bc)
+      ((mkv_count++))
+    fi
+  done
+
+  if [[ $mkv_count -eq 0 ]]; then
+    echo "WARNING: No MKV files found for validation"
+    return 0
+  fi
+
+  # Convert to minutes for display
+  local vob_minutes=$(echo "scale=1; $total_vob_duration / 60" | bc)
+  local mkv_minutes=$(echo "scale=1; $total_mkv_duration / 60" | bc)
+
+  echo ""
+  echo "Validation Results:"
+  echo "  VOB total duration: ${vob_minutes} minutes (${vob_count} files)"
+  echo "  MKV total duration: ${mkv_minutes} minutes (${mkv_count} files)"
+
+  # Compare durations (allow 2% tolerance for rounding/encoding differences)
+  if (( $(echo "$total_vob_duration == 0" | bc -l) )); then
+    echo "WARNING: Could not determine VOB duration"
+    return 0
+  fi
+
+  local duration_ratio=$(echo "scale=4; $total_mkv_duration / $total_vob_duration" | bc)
+  local percentage=$(echo "scale=1; $duration_ratio * 100" | bc)
+
+  echo "  Coverage: ${percentage}%"
+  echo ""
+
+  if (( $(echo "$duration_ratio < 0.98" | bc -l) )); then
+    echo "⚠️  VALIDATION FAILED: Extracted MKVs are significantly shorter than source VOBs!"
+    echo "    This indicates incomplete extraction - some DVD content is missing."
+    echo "    Possible causes: MakeMKV cell extraction issue, complex DVD structure"
+    return 1
+  fi
+
+  echo "✓ Validation passed - extraction appears complete"
+  return 0
+}
+
 create_files_from_iso() {
   echo "Entered create_files_from_iso with create_access_files=$1"
   local create_access_files="$1"
@@ -315,6 +412,19 @@ create_files_from_iso() {
   done
 
   echo "All titles processed."
+
+  # Validate extraction completeness
+  if ! validate_extraction "$ISO_PATH" "$out_dir"; then
+    echo ""
+    echo "EXTRACTION VALIDATION FAILED!"
+    echo "The extracted MKV files may be incomplete or truncated."
+    read -r "?Review the validation results above. Continue anyway? (y/n): " continue_anyway
+    if [[ ! "$continue_anyway" =~ ^[Yy]$ ]]; then
+      echo "Stopping. Please investigate the extraction issue."
+      echo "Consider re-ripping the DVD or checking MakeMKV for errors."
+      return 1
+    fi
+  fi
 }
 
 create_access_files_only() {
