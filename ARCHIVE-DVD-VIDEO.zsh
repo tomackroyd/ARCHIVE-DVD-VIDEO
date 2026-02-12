@@ -59,11 +59,24 @@ create_iso() {
   echo "Listing external disk devices:"
   diskutil list external
   echo -n "Enter your DVD device identifier (e.g., disk3): "
-  read dvd_dev
+  read -r dvd_dev
+
+  # Validate device identifier format
+  if [[ ! "$dvd_dev" =~ ^disk[0-9]+$ ]]; then
+    echo "ERROR: Invalid device identifier format. Expected format: disk# (e.g., disk3)"
+    return 1
+  fi
 
   # Validate device exists
   if ! diskutil info "$dvd_dev" >/dev/null 2>&1; then
     echo "ERROR: Device $dvd_dev not found or not accessible."
+    return 1
+  fi
+
+  # Verify it's an external disk (not internal)
+  if ! diskutil list external | grep -q "$dvd_dev"; then
+    echo "ERROR: Device $dvd_dev is not listed as an external disk."
+    echo "For safety, this script only works with external disks."
     return 1
   fi
 
@@ -77,7 +90,7 @@ create_iso() {
   fi
 
   echo -n "Enter output ISO filename (e.g., CA0001234567): "
-  read iso_file
+  read -r iso_file
   iso_file="${iso_file##*/}"
   iso_file="${iso_file%.iso}.iso"
   iso_path="$PWD/$iso_file"
@@ -210,7 +223,7 @@ create_files_from_iso() {
     read -r "?Use this ISO? (y/n): " use_last_iso
     if [[ ! "$use_last_iso" =~ ^[Yy]$ ]]; then
       echo -n "Enter the path to the ISO file: "
-      read ISO_PATH
+      read -r ISO_PATH
       [[ ! -f "$ISO_PATH" ]] && { echo "ERROR: File not found: $ISO_PATH"; return 1; }
     fi
   else
@@ -218,7 +231,7 @@ create_files_from_iso() {
     echo "Available ISOs in $PWD:"
     find "$PWD" -maxdepth 2 -name "*.iso" 2>/dev/null
     echo -n "Enter the path to the ISO file: "
-    read ISO_PATH
+    read -r ISO_PATH
     [[ ! -f "$ISO_PATH" ]] && { echo "ERROR: File not found: $ISO_PATH"; return 1; }
   fi
 
@@ -306,7 +319,7 @@ create_files_from_iso() {
 
 create_access_files_only() {
     echo -n "Enter the path to the directory containing MKVs: "
-    read rip_dir
+    read -r rip_dir
 
     if [[ ! -d "$rip_dir" ]]; then
         echo "ERROR: Directory not found: $rip_dir"
@@ -345,7 +358,7 @@ create_access_files_only() {
 
 echo "Current working directory: $(pwd)"
 echo -n "Is this the directory where you want to perform DVD operations? (y/n): "
-read yn
+read -r yn
 case "$yn" in
     [Yy]* )
         echo "Proceeding with main menu..."
