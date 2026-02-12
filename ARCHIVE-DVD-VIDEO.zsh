@@ -320,7 +320,7 @@ create_files_from_iso() {
     read -r "?Use this ISO? (y/n): " use_last_iso
     if [[ ! "$use_last_iso" =~ ^[Yy]$ ]]; then
       echo -n "Enter the path to the ISO file: "
-      read -r ISO_PATH
+      read ISO_PATH
       [[ ! -f "$ISO_PATH" ]] && { echo "ERROR: File not found: $ISO_PATH"; return 1; }
     fi
   else
@@ -328,7 +328,7 @@ create_files_from_iso() {
     echo "Available ISOs in $PWD:"
     find "$PWD" -maxdepth 2 -name "*.iso" 2>/dev/null
     echo -n "Enter the path to the ISO file: "
-    read -r ISO_PATH
+    read ISO_PATH
     [[ ! -f "$ISO_PATH" ]] && { echo "ERROR: File not found: $ISO_PATH"; return 1; }
   fi
 
@@ -429,7 +429,7 @@ create_files_from_iso() {
 
 create_access_files_only() {
     echo -n "Enter the path to the directory containing MKVs: "
-    read -r rip_dir
+    read rip_dir
 
     if [[ ! -d "$rip_dir" ]]; then
         echo "ERROR: Directory not found: $rip_dir"
