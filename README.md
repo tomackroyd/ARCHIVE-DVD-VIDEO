@@ -35,13 +35,13 @@ These tools are not required for the script to run, but enhance functionality:
 - **jq** - Faster JSON parsing for field order detection
 
 ### Recommended Archival Tools
-Essential for a complete archival workflow:
+For a complete archival workflow:
 
 - **exiftool** - Extract and analyze file metadata
 - **mediainfo** - Display technical metadata about media files
+- **Invisor** - Improved MediaInfo wrapper (Mac App Store)
 - **IINA** - Modern video player for verification (or VLC)
 - **amiaos** - AMIA Open Source archival tool suite
-- **Invisor** - Media file inspector (Mac App Store) 
 
 
 ## Installation
