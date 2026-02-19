@@ -491,6 +491,7 @@ esac
 # Function to handle exit and log cleanup
 handle_exit() {
   if [[ -n "$out_dir" && -d "$out_dir" && -n "$LOGFILE" && -f "$LOGFILE" ]]; then
+    # MKV files were created - move log to output directory
     log_basename="${output_dir_name:-trace}-RF.log"
     new_logfile="${out_dir}/${log_basename}"
     if mv "$LOGFILE" "$new_logfile" 2>/dev/null; then
@@ -498,8 +499,17 @@ handle_exit() {
     else
       echo "Log file remains at: $LOGFILE"
     fi
+  elif [[ -n "$ISO_PATH" && -f "$ISO_PATH" && -n "$LOGFILE" && -f "$LOGFILE" ]]; then
+    # ISO was created but no MKV files - rename log in current directory
+    iso_basename="${ISO_PATH:t:r}"  # Extract filename without path or extension
+    new_logfile="${PWD}/${iso_basename}-RF.log"
+    if mv "$LOGFILE" "$new_logfile" 2>/dev/null; then
+      echo "Log file renamed to: $new_logfile"
+    else
+      echo "Log file remains at: $LOGFILE"
+    fi
   else
-    echo "Log file not moved (output directory or log file missing)."
+    echo "Log file not moved (no output created)."
     [[ -n "$LOGFILE" && -f "$LOGFILE" ]] && echo "Log file is at: $LOGFILE"
   fi
 
