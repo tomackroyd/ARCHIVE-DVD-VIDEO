@@ -1,6 +1,6 @@
 # ARCHIVE-DVD-VIDEO
 
-Shell scripts for creating preservation-quality archival copies of DVD-VIDEO discs on macOS. Creates ISO disk images, extracts video titles to MKV format (preservation masters), and generates access MP4 files with bob deinterlacing. Optional mezzanine ProRes 422 creation for broadcast workflows, and version with blend-deinterlacing.
+Shell scripts for creating preservation-quality archival copies of DVD-VIDEO discs on macOS. Creates ISO disk images as the core preservation object, extracts DVD titles to MKV format as native-compression title masters, and generates access MP4 files with bob deinterlacing. Optional mezzanine ProRes 422 creation for broadcast workflows, and a version with blend-deinterlacing.
 
 ## Features
 
