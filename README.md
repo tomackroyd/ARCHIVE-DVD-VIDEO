@@ -41,7 +41,7 @@ Essential for a complete archival workflow:
 - **mediainfo** - Display technical metadata about media files
 - **IINA** - Modern video player for verification (or VLC)
 - **amiaos** - AMIA Open Source archival tool suite
-- **Invisor** - ISO file inspection (Mac App Store) 
+- **Invisor** - Media file inspector (Mac App Store) 
 
 
 ## Installation
@@ -77,7 +77,7 @@ brew cleanup
 brew doctor
 ```
 
-**Invisor** (ISO inspector) must be installed separately from the Mac App Store.
+**Invisor** (media file inspector) must be installed separately from the Mac App Store.
 
 ### 4. Configure PATH
 
