@@ -492,7 +492,7 @@ esac
 handle_exit() {
   if [[ -n "$out_dir" && -d "$out_dir" && -n "$LOGFILE" && -f "$LOGFILE" ]]; then
     # MKV files were created - move log to output directory
-    log_basename="${output_dir_name:-trace}-RF.log"
+    log_basename="${output_dir_name:-trace}-RF02.log"
     new_logfile="${out_dir}/${log_basename}"
     if mv "$LOGFILE" "$new_logfile" 2>/dev/null; then
       echo "Log file moved to: $new_logfile"
@@ -502,7 +502,7 @@ handle_exit() {
   elif [[ -n "$ISO_PATH" && -f "$ISO_PATH" && -n "$LOGFILE" && -f "$LOGFILE" ]]; then
     # ISO was created but no MKV files - rename log in current directory
     iso_basename="${ISO_PATH:t:r}"  # Extract filename without path or extension
-    new_logfile="${PWD}/${iso_basename}-RF.log"
+    new_logfile="${PWD}/${iso_basename}-RF01.log"
     if mv "$LOGFILE" "$new_logfile" 2>/dev/null; then
       echo "Log file renamed to: $new_logfile"
     else
