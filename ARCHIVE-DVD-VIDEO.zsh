@@ -122,7 +122,7 @@ create_iso() {
   echo "Using size with 5% safety margin: $dvd_size_with_margin bytes"
   echo "Copying DVD to $iso_path. This may take a while..."
 
-  if ! sudo ddrescue -r3 -s "$dvd_size_with_margin" "/dev/$dvd_raw_dev" "$iso_path" "$iso_path.log"; then
+  if ! sudo caffeinate -dims ddrescue -r3 -s "$dvd_size_with_margin" "/dev/$dvd_raw_dev" "$iso_path" "$iso_path.log"; then
     echo "ERROR: ddrescue failed. Check $iso_path.log for details."
     return 1
   fi
