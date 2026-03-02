@@ -29,7 +29,7 @@ A window opens with a line ending in `%` — this means Terminal is ready for in
 
 ## Step 2 — Navigate to the imaging folder
 
-Terminal always works inside a particular folder. ISO files will be created wherever Terminal is pointed when the script runs, so you need to point it at your imaging folder first. The simplest way to do this on a Mac is to drag the folder in.
+Terminal always works inside a particular folder. ISO files will be created wherever Terminal is pointed when the script runs, so you need to point it at your imaging folder first. Terminal may already be set up to automatically work inside the correct folder, called the "working directory". In case it is not, the simplest way to set the working directory on a Mac is to drag the folder in:
 
 1. In Terminal, type `cd ` — that is the letter **c**, the letter **d**, then a **space**. Do not press Return yet.
 2. In Finder, locate the imaging folder (e.g. `DVD-IMAGING` on the Desktop)
