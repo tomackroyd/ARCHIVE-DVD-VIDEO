@@ -9,7 +9,8 @@ This guide walks through creating an ISO disk image from a DVD using Terminal on
 - A Mac with the imaging software set up
 - An external DVD drive connected to the Mac
 - The DVD you want to image
-- The imaging folder (e.g. `DVD-IMAGING` on the Desktop) open in Finder
+- The imaging folder (where ISO files will be saved, e.g. `DVD-IMAGING` on the Desktop) open in Finder
+- The `ARCHIVE-DVD-VIDEO.zsh` script file visible in Finder (it lives in a separate folder)
 - An admin password for the Mac, or TouchID configured
 
 ---
@@ -28,10 +29,10 @@ A window opens with a line ending in `%` — this means Terminal is ready for in
 
 ## Step 2 — Navigate to the imaging folder
 
-Terminal always works inside a particular folder. Before running the script you need to point it at the imaging folder. The simplest way to do this on a Mac is to drag the folder in.
+Terminal always works inside a particular folder. ISO files will be created wherever Terminal is pointed when the script runs, so you need to point it at your imaging folder first. The simplest way to do this on a Mac is to drag the folder in.
 
 1. In Terminal, type `cd ` — that is the letter **c**, the letter **d**, then a **space**. Do not press Return yet.
-2. Open Finder and locate the imaging folder (e.g. `DVD-IMAGING` on the Desktop)
+2. In Finder, locate the imaging folder (e.g. `DVD-IMAGING` on the Desktop)
 3. Click the imaging folder and **drag it into the Terminal window** and let go
 4. The folder's full path will appear automatically after `cd `
 5. Now press **Return**
@@ -52,11 +53,13 @@ Insert the DVD into the external drive and wait around 10 seconds for the Mac to
 
 ## Step 4 — Run the script
 
-Type the following exactly and press **Return**:
+The script file lives in a different folder from your imaging folder, so you need to point Terminal at it directly. Use the same drag technique as Step 2, but drag the script file rather than a folder.
 
-```
-zsh ARCHIVE-DVD-VIDEO.zsh
-```
+1. In Terminal, type `zsh ` — the letters **z**, **s**, **h**, then a **space**. Do not press Return yet.
+2. In Finder, locate the `ARCHIVE-DVD-VIDEO.zsh` script file
+3. Click the script file and **drag it into the Terminal window** and let go
+4. The script's full path will appear automatically after `zsh `
+5. Now press **Return**
 
 A menu will appear. Type `1` and press **Return** to start imaging.
 
@@ -141,7 +144,7 @@ The disc can now be ejected.
 
 | What you see | What to do |
 |---|---|
-| `command not found` after typing `zsh ARCHIVE-DVD-VIDEO.zsh` | You are not in the imaging folder — repeat Step 2 |
+| `command not found` or `no such file` after Step 4 | The script file was not dragged in correctly — repeat Step 4 |
 | No external disk listed in Step 5 | Eject and reinsert the disc, wait 10 seconds, press Control+C and run the script again |
 | Password prompt does not respond | Type your password and press Return — nothing will appear as you type |
 | Imaging stops with an error | Note any message on screen, then refer to the README |
