@@ -32,8 +32,8 @@ These tools are not required for the script to run, but enhance functionality:
 
 - **bc** - Basic calculator for extraction validation (highly recommended)
 - **jq** - Faster JSON parsing for field order detection
-- **lsdvd** - Displays info about DVD disks and disk images; use 'bash lsdvd -c path-to-.iso'
-- **dvdbackup** - DVD backup utility which can also display info about DVDs; use 'dvdbackup -I -i path-to-.iso'
+- **lsdvd** - Displays info about DVD disks and disk images; use `lsdvd -c path-to-.iso`
+- **dvdbackup** - DVD backup utility which can also display info about DVDs; use `dvdbackup -I -i path-to-.iso`
 
 ### Recommended Archival Tools
 For a complete archival workflow:
