@@ -112,7 +112,7 @@ Password:
 
 ## Step 8 — Wait for imaging to complete
 
-The script will display ddrescue progress. A healthy disc typically takes 10–20 minutes. A damaged disc may take considerably longer.
+The script will display ddrescue progress. A healthy disc typically takes 5-15 minutes. A damaged disc may take considerably longer. This process will also depend on how fast your optical disk drive is.
 
 The progress display looks like this:
 
