@@ -355,7 +355,7 @@ create_files_from_iso() {
   local makemkv_tmp
   makemkv_tmp=$(mktemp)
 
-  makemkvcon --minlength=5 mkv "iso:$ISO_PATH" all "$out_dir" 2>&1 | tee "$makemkv_tmp"
+  makemkvcon --minlength=5 mkv "iso:$ISO_PATH" all "$out_dir" 2>&1 | tee "$makemkv_tmp" | tee -a "$LOGFILE" >/dev/tty
   local makemkv_status=${pipestatus[1]}
 
   if [[ $makemkv_status -ne 0 ]]; then
@@ -399,7 +399,7 @@ create_files_from_iso() {
           echo "Found VIDEO_TS at: $video_ts_parent"
           echo "Removing incomplete extraction and retrying in file mode..."
           rm -f "$out_dir"/*.mkv
-          makemkvcon --minlength=5 mkv "file:$video_ts_parent" all "$out_dir" 2>&1 | tee "$makemkv_tmp"
+          makemkvcon --minlength=5 mkv "file:$video_ts_parent" all "$out_dir" 2>&1 | tee "$makemkv_tmp" | tee -a "$LOGFILE" >/dev/tty
           local retry_status=${pipestatus[1]}
 
           if [[ $retry_status -ne 0 ]]; then
