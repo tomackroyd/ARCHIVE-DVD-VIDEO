@@ -352,10 +352,74 @@ create_files_from_iso() {
   fi
 
   echo "Extracting titles with MakeMKV..."
-  if ! makemkvcon --minlength=5 mkv iso:"$ISO_PATH" all "$out_dir"; then
+  local makemkv_tmp
+  makemkv_tmp=$(mktemp)
+
+  makemkvcon --minlength=5 mkv "iso:$ISO_PATH" all "$out_dir" 2>&1 | tee "$makemkv_tmp"
+  local makemkv_status=${pipestatus[1]}
+
+  if [[ $makemkv_status -ne 0 ]]; then
+    rm -f "$makemkv_tmp"
     echo "ERROR: MakeMKV failed to extract titles."
     return 1
   fi
+
+  # Check for cell removal warnings in MakeMKV output
+  if grep -qi "cells.*removed" "$makemkv_tmp"; then
+    local removed_msg
+    removed_msg=$(grep -i "cells.*removed" "$makemkv_tmp" | head -1 | tr -d '\r')
+    echo ""
+    echo "⚠️  WARNING: $removed_msg"
+    echo "    Content may be missing from the beginning of one or more titles."
+    echo "    Switching to file mode replicates 'Open DVD manually' in the MakeMKV GUI"
+    echo "    and bypasses the heuristic that removes cells from the title start."
+    read -r "?Retry extraction in file mode to include all cells? (y/n): " retry_cells
+    if [[ "$retry_cells" =~ ^[Yy]$ ]]; then
+      echo "Mounting ISO for file-mode extraction..."
+      local attach_output
+      attach_output=$(hdiutil attach "$ISO_PATH" -readonly -nobrowse 2>/dev/null)
+      if [[ $? -ne 0 ]]; then
+        echo "ERROR: Could not mount ISO. Keeping initial extraction."
+      else
+        # Find the mount path that contains VIDEO_TS (the UDF layer)
+        local video_ts_parent=""
+        while IFS= read -r line; do
+          local mp
+          mp=$(echo "$line" | awk -F'\t' '{mp=$NF; gsub(/^ +| +$/, "", mp); print mp}')
+          [[ "$mp" == /Volumes/* && -d "$mp/VIDEO_TS" ]] && { video_ts_parent="$mp"; break; }
+        done <<< "$attach_output"
+
+        local attach_device
+        attach_device=$(echo "$attach_output" | awk 'NR==1{print $1}')
+
+        if [[ -z "$video_ts_parent" ]]; then
+          echo "ERROR: Could not find VIDEO_TS on mounted ISO. Keeping initial extraction."
+          hdiutil detach "$attach_device" -quiet 2>/dev/null
+        else
+          echo "Found VIDEO_TS at: $video_ts_parent"
+          echo "Removing incomplete extraction and retrying in file mode..."
+          rm -f "$out_dir"/*.mkv
+          makemkvcon --minlength=5 mkv "file:$video_ts_parent" all "$out_dir" 2>&1 | tee "$makemkv_tmp"
+          local retry_status=${pipestatus[1]}
+
+          if [[ $retry_status -ne 0 ]]; then
+            echo "ERROR: MakeMKV file-mode retry failed. Check $out_dir for partial output."
+          else
+            echo "File-mode extraction complete."
+            if grep -qi "cells.*removed" "$makemkv_tmp"; then
+              echo "⚠️  WARNING: MakeMKV still reported cell removal in file mode."
+              echo "    Consider using ffmpeg direct VOB extraction. See VALIDATION-TROUBLESHOOTING.md."
+            else
+              echo "✓ No cell removal warnings in file mode."
+            fi
+          fi
+          hdiutil detach "$video_ts_parent" -quiet 2>/dev/null || hdiutil detach "$attach_device" -quiet 2>/dev/null
+        fi
+      fi
+    fi
+  fi
+
+  rm -f "$makemkv_tmp"
 
   echo "MakeMKV extraction complete"
   sleep 2
