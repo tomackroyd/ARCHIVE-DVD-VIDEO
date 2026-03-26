@@ -365,6 +365,7 @@ create_files_from_iso() {
   fi
 
   # Check for cell removal warnings in MakeMKV output
+  local cells_removed_unresolved=false
   if grep -qi "cells.*removed" "$makemkv_tmp"; then
     local removed_msg
     removed_msg=$(grep -i "cells.*removed" "$makemkv_tmp" | head -1 | tr -d '\r')
@@ -380,6 +381,7 @@ create_files_from_iso() {
       attach_output=$(hdiutil attach "$ISO_PATH" -readonly -nobrowse 2>/dev/null)
       if [[ $? -ne 0 ]]; then
         echo "ERROR: Could not mount ISO. Keeping initial extraction."
+        cells_removed_unresolved=true
       else
         # Find the mount path that contains VIDEO_TS (the UDF layer)
         local video_ts_parent=""
@@ -394,6 +396,7 @@ create_files_from_iso() {
 
         if [[ -z "$video_ts_parent" ]]; then
           echo "ERROR: Could not find VIDEO_TS on mounted ISO. Keeping initial extraction."
+          cells_removed_unresolved=true
           hdiutil detach "$attach_device" -quiet 2>/dev/null
         else
           echo "Found VIDEO_TS at: $video_ts_parent"
@@ -404,22 +407,34 @@ create_files_from_iso() {
 
           if [[ $retry_status -ne 0 ]]; then
             echo "ERROR: MakeMKV file-mode retry failed. Check $out_dir for partial output."
+            cells_removed_unresolved=true
+          elif grep -qi "cells.*removed" "$makemkv_tmp"; then
+            echo "⚠️  WARNING: MakeMKV still reported cell removal in file mode."
+            echo "    Consider using ffmpeg direct VOB extraction. See VALIDATION-TROUBLESHOOTING.md."
+            cells_removed_unresolved=true
           else
-            echo "File-mode extraction complete."
-            if grep -qi "cells.*removed" "$makemkv_tmp"; then
-              echo "⚠️  WARNING: MakeMKV still reported cell removal in file mode."
-              echo "    Consider using ffmpeg direct VOB extraction. See VALIDATION-TROUBLESHOOTING.md."
-            else
-              echo "✓ No cell removal warnings in file mode."
-            fi
+            echo "✓ No cell removal warnings in file mode."
           fi
           hdiutil detach "$video_ts_parent" -quiet 2>/dev/null || hdiutil detach "$attach_device" -quiet 2>/dev/null
         fi
       fi
+    else
+      cells_removed_unresolved=true
     fi
   fi
 
   rm -f "$makemkv_tmp"
+
+  if [[ "$cells_removed_unresolved" == "true" ]]; then
+    echo ""
+    echo "⚠️  The MKV extraction may be missing content from the beginning of one or more titles."
+    read -r "?Continue to rename and create access files from this incomplete extraction? (y/n): " proceed_incomplete
+    if [[ ! "$proceed_incomplete" =~ ^[Yy]$ ]]; then
+      echo "Halting. Extracted files remain in $out_dir for manual processing."
+      return 1
+    fi
+    echo "Continuing with incomplete extraction as requested."
+  fi
 
   echo "MakeMKV extraction complete"
   sleep 2
