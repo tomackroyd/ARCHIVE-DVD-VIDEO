@@ -145,55 +145,51 @@ generate_access_mp4() {
 
   echo "Creating access MP4 for $(basename "$mkv_file")..."
 
-  # Stream-level metadata: field_order, stream SAR, and frame dimensions
-  local field_order stream_sar stream_dar width height
+  # Get field_order, codec SAR, and frame dimensions from ffprobe
+  local field_order codec_sar stream_dar width height
   local ffprobe_json
   ffprobe_json=$(ffprobe -v quiet -print_format json -show_streams -select_streams v:0 "$mkv_file" 2>/dev/null)
 
   if command -v jq >/dev/null 2>&1; then
     field_order=$(printf '%s' "$ffprobe_json" | jq -r '.streams[0].field_order // empty')
-    stream_sar=$(printf '%s' "$ffprobe_json" | jq -r '.streams[0].sample_aspect_ratio // empty')
+    codec_sar=$(printf '%s' "$ffprobe_json" | jq -r '.streams[0].sample_aspect_ratio // empty')
     stream_dar=$(printf '%s' "$ffprobe_json" | jq -r '.streams[0].display_aspect_ratio // empty')
     width=$(printf '%s' "$ffprobe_json" | jq -r '.streams[0].width // empty')
     height=$(printf '%s' "$ffprobe_json" | jq -r '.streams[0].height // empty')
   else
     field_order=$(printf '%s' "$ffprobe_json" | grep -m1 '"field_order"' | sed 's/.*"field_order":\s*"\([^"]*\)".*/\1/')
-    stream_sar=$(printf '%s' "$ffprobe_json" | grep -m1 '"sample_aspect_ratio"' | sed 's/.*"sample_aspect_ratio":\s*"\([^"]*\)".*/\1/')
+    codec_sar=$(printf '%s' "$ffprobe_json" | grep -m1 '"sample_aspect_ratio"' | sed 's/.*"sample_aspect_ratio":\s*"\([^"]*\)".*/\1/')
     stream_dar=$(printf '%s' "$ffprobe_json" | grep -m1 '"display_aspect_ratio"' | sed 's/.*"display_aspect_ratio":\s*"\([^"]*\)".*/\1/')
     width=$(printf '%s' "$ffprobe_json" | grep -m1 '"width"' | sed 's/.*"width":\s*\([0-9]*\).*/\1/')
     height=$(printf '%s' "$ffprobe_json" | grep -m1 '"height"' | sed 's/.*"height":\s*\([0-9]*\).*/\1/')
   fi
 
-  # Frame-level SAR reads the MPEG-2 sequence_display_extension directly from the bitstream.
-  # For anamorphic DVD content MakeMKV stores the 16:9 ratio as 'Original display aspect ratio'
-  # (informational only) while setting the active display ratio to 4:3 — so the stream-level
-  # SAR is wrong. The sequence_display_extension in the MPEG-2 stream carries the correct ratio
-  # and is exposed via frame-level ffprobe. Only the first packet is read for speed.
-  local frame_sar
-  local ffprobe_frames_json
-  ffprobe_frames_json=$(ffprobe -v quiet -print_format json -show_frames -select_streams v:0 -read_intervals "%+#1" "$mkv_file" 2>/dev/null)
-  if command -v jq >/dev/null 2>&1; then
-    frame_sar=$(printf '%s' "$ffprobe_frames_json" | jq -r '.frames[0].sample_aspect_ratio // empty')
-  else
-    frame_sar=$(printf '%s' "$ffprobe_frames_json" | grep -m1 '"sample_aspect_ratio"' | sed 's/.*"sample_aspect_ratio":\s*"\([^"]*\)".*/\1/')
-  fi
-
   echo "Detected field_order: '$field_order'"
-  echo "Stream SAR: '$stream_sar'  Frame SAR: '$frame_sar'"
 
-  # When stream and frame SARs differ, use the frame SAR to compute the true DAR.
-  local dar
-  if [[ -n "$frame_sar" && -n "$stream_sar" && "$frame_sar" != "$stream_sar" && -n "$width" && -n "$height" ]]; then
+  # ffprobe JSON exposes AVCodecParameters.sample_aspect_ratio (from the MPEG-2 bitstream).
+  # For anamorphic DVD content this is the wrong 4:3 codec SAR. The correct display SAR is
+  # stored by MakeMKV in the MKV container's DisplayWidth/DisplayHeight (AVStream.sample_aspect_ratio),
+  # which ffprobe does not expose in its JSON output. However, ffmpeg does show it in its
+  # stream info as [SAR X:Y DAR A:B] when it differs from the codec SAR. We probe with ffmpeg
+  # and parse that bracketed value out directly.
+  local container_sar dar
+  local ffmpeg_probe
+  ffmpeg_probe=$(ffmpeg -hide_banner -i "$mkv_file" 2>&1 || true)
+  container_sar=$(printf '%s' "$ffmpeg_probe" | grep -oE '\[SAR [0-9]+:[0-9]+' | sed 's/\[SAR //' | head -1)
+
+  echo "Codec SAR: '$codec_sar'  Container SAR: '$container_sar'"
+
+  if [[ -n "$container_sar" && "$container_sar" != "$codec_sar" && -n "$width" && -n "$height" ]]; then
     local sar_num sar_den
-    sar_num="${frame_sar%%:*}"
-    sar_den="${frame_sar##*:}"
+    sar_num="${container_sar%%:*}"
+    sar_den="${container_sar##*:}"
     if [[ "$sar_den" -gt 0 ]]; then
       dar=$(awk -v w="$width" -v h="$height" -v sn="$sar_num" -v sd="$sar_den" 'BEGIN {
         n = w * sn; d = h * sd
         a = n; b = d; while (b) { t = b; b = a % b; a = t }
         printf "%d:%d", n/a, d/a
       }')
-      echo "Frame SAR ($frame_sar) differs from stream SAR ($stream_sar), using computed DAR: $dar"
+      echo "Container SAR ($container_sar) differs from codec SAR ($codec_sar), using computed DAR: $dar"
     else
       dar="$stream_dar"
     fi
