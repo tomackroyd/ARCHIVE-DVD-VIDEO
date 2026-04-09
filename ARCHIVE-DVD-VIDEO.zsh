@@ -145,17 +145,31 @@ generate_access_mp4() {
 
   echo "Creating access MP4 for $(basename "$mkv_file")..."
 
-  # Get field order - use jq if available, otherwise fallback to grep/sed
+  # Get video stream metadata - run ffprobe once and extract field_order and display_aspect_ratio.
+  # display_aspect_ratio reads the MKV container-level DAR (correctly populated by MakeMKV from
+  # IFO metadata), which can differ from the SAR embedded in the video bitstream for anamorphic
+  # content (e.g. 720x576 signalled as 16:9 in IFO but 4:3 in the MPEG-2 sequence header).
   local field_order
+  local dar
+  local ffprobe_json
+  ffprobe_json=$(ffprobe -v quiet -print_format json -show_streams -select_streams v:0 "$mkv_file" 2>/dev/null)
+
   if command -v jq >/dev/null 2>&1; then
-    # Use jq for proper JSON parsing
-    field_order=$(ffprobe -v quiet -print_format json -show_streams "$mkv_file" 2>/dev/null | jq -r '.streams[0].field_order // empty')
+    field_order=$(printf '%s' "$ffprobe_json" | jq -r '.streams[0].field_order // empty')
+    dar=$(printf '%s' "$ffprobe_json" | jq -r '.streams[0].display_aspect_ratio // empty')
   else
-    # Fallback to grep/sed
-    field_order=$(ffprobe -v quiet -print_format json -show_streams "$mkv_file" 2>/dev/null | grep -m1 '"field_order"' | sed 's/.*"field_order":\s*"\([^"]*\)".*/\1/')
+    field_order=$(printf '%s' "$ffprobe_json" | grep -m1 '"field_order"' | sed 's/.*"field_order":\s*"\([^"]*\)".*/\1/')
+    dar=$(printf '%s' "$ffprobe_json" | grep -m1 '"display_aspect_ratio"' | sed 's/.*"display_aspect_ratio":\s*"\([^"]*\)".*/\1/')
   fi
 
   echo "Detected field_order: '$field_order'"
+  echo "Detected display aspect ratio: '$dar'"
+
+  # Build aspect flag to explicitly set DAR in output, overriding codec-level SAR
+  local -a aspect_flag=()
+  if [[ -n "$dar" ]]; then
+    aspect_flag=(-aspect "$dar")
+  fi
 
   # Map field_order to bwdif parity and determine if deinterlacing is needed
   local parity
@@ -192,6 +206,7 @@ generate_access_mp4() {
       -c:v libx264 -b:v 3M -minrate 3M -maxrate 6M -bufsize 6M \
       -preset medium -profile:v high -level:v 3.1 -pix_fmt yuv420p \
       -c:a aac -b:a 192k -ac 2 -movflags +faststart \
+      "${aspect_flag[@]}" \
       "$access_file"; then
       echo "ERROR: ffmpeg failed to create access file"
       return 1
@@ -204,6 +219,7 @@ generate_access_mp4() {
       -c:v libx264 -b:v 3M -minrate 3M -maxrate 6M -bufsize 6M \
       -preset medium -profile:v high -level:v 3.1 -pix_fmt yuv420p \
       -c:a aac -b:a 192k -ac 2 -movflags +faststart \
+      "${aspect_flag[@]}" \
       "$access_file"; then
       echo "ERROR: ffmpeg failed to create access file"
       return 1
