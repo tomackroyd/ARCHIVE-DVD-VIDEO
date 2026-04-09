@@ -1,6 +1,7 @@
 # DVD-VR Recovery on macOS
 
 Guide to recovering content from DVD-RW discs recorded in DVD-VR (Video Recording) mode on macOS, using ddrescue and FFmpeg.
+This guide was written by Claude following a Claude chat to troubleshoot DVD-VR discs that were unable to be processed by the main [ARCHIVE-DVD-VIDEO](https://github.com/tomackroyd/ARCHIVE-DVD-VIDEO/blob/main/ARCHIVE-DVD-VIDEO.zsh) shell script
 
 ## Background
 
