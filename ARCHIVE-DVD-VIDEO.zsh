@@ -501,7 +501,10 @@ while true; do
   echo "3. Create archival MKVs only"
   echo "4. Create access files only"
   echo "5. Exit"
-  read -r choice
+  if ! read -r choice; then
+    echo "EOF detected. Exiting..."
+    handle_exit
+  fi
   case "$choice" in
     1) create_iso ;;
     2) create_files_from_iso "true" ;;

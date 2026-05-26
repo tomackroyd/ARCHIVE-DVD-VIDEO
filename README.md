@@ -6,7 +6,7 @@ Shell script for creating preservation-quality archival copies of DVD-VIDEO disc
 
 - **ISO Creation**: Uses ddrescue with 5% safety margin for reliable disk imaging
 - **MKV Extraction**: Extracts all titles (greater than 5 seconds long) using MakeMKV
-- **Extraction Validation**: Automatic duration comparison detects incomplete MakeMKV extractions
+- **Cell Removal Detection**: Automatic log analysis detects when MakeMKV removes cells, halting to prevent incomplete extractions
 - **Access Files**: Generates MP4 files with automatic field order detection
 - **Bob Deinterlacing**: Uses `bwdif=mode=send_field` to preserve original temporal resolution
 - **Error Recovery**: Comprehensive error handling and logging throughout
@@ -30,7 +30,6 @@ Shell script for creating preservation-quality archival copies of DVD-VIDEO disc
 ### Optional Software
 These tools are not required for the script to run, but enhance functionality:
 
-- **bc** - Basic calculator for extraction validation (highly recommended)
 - **jq** - Faster JSON parsing for field order detection
 - **lsdvd** - Displays info about DVD disks and disk images; use `lsdvd -c path-to-.iso`
 - **dvdbackup** - DVD backup utility which can also display info about DVDs; use `dvdbackup -I -i path-to-.iso`
@@ -56,7 +55,7 @@ For a complete archival workflow:
 ### 2. Install Required Dependencies
 
 ```bash
-brew install ffmpeg ddrescue makemkv bc jq
+brew install ffmpeg ddrescue makemkv jq
 ```
 
 ### 3. Install Archival Tools (Recommended)
@@ -174,13 +173,13 @@ The script presents an interactive menu with options for your workflow.
 **What Happens**:
 1. MakeMKV extracts all titles ≥5 seconds to MKV
 2. Files renamed: `title_t00.mkv` → `FILENAME-PM01.mkv`
-3. **Extraction validated**: VOB duration compared with MKV duration
+3. **Cell removal check**: Automatic detection of cell removal warnings in MakeMKV logs
 4. Field order detected for each title
 5. Access MP4 created with appropriate deinterlacing
 6. Log file moved to output directory on exit
 
-**Validation Check**:
-After extraction, the script automatically validates that MakeMKV extracted all content by comparing total VOB duration with total MKV duration. If validation fails (MKVs < 98% of VOB duration), you'll be prompted to investigate. See [VALIDATION-TROUBLESHOOTING.md](VALIDATION-TROUBLESHOOTING.md) for workarounds.
+**Cell Removal Check**:
+After extraction, the script automatically checks the MakeMKV log for cell removal warnings. If cells were removed, the script deletes the partial MKV and halts to prevent incomplete extractions. See [VALIDATION-TROUBLESHOOTING.md](VALIDATION-TROUBLESHOOTING.md) for workarounds.
 
 **Output**:
 - `FILENAME-PM01.mkv`, `FILENAME-PM02.mkv`, etc. - Preservation masters
@@ -198,12 +197,12 @@ After extraction, the script automatically validates that MakeMKV extracted all 
 - When you only need archival MKVs
 - Saves time when processing multiple discs
 
-Same as Option 2 but skips MP4 generation. Includes extraction validation.
+Same as Option 2 but skips MP4 generation. Includes cell removal check.
 
 **Output**:
 - `FILENAME-PM##.mkv` - Preservation master files only
 
-**Note**: Validation still runs to detect incomplete extractions.
+**Note**: Cell removal check still runs to detect incomplete extractions.
 
 ---
 
@@ -436,14 +435,14 @@ Troubleshoot at this page: https://forum.makemkv.com/forum/viewtopic.php?t=35350
 **Solution:**
 Bob deinterlacing (doubles frame rate) is best for preserving temporal resolution. If playback looks choppy, ensure your player supports 50fps playback.
 
-### Extraction validation failed
+### Cell removal check failed (Halted)
 
 When you see:
 ```
-⚠️  VALIDATION FAILED: Extracted MKVs are significantly shorter than source VOBs!
+⚠️  HALTED: Cells X-Y were removed from title start
 ```
 
-This means MakeMKV failed to extract all DVD cells. The extracted MKVs are incomplete.
+This means MakeMKV's automatic heuristics incorrectly classified content cells as menu cells and stripped them. The partial MKV is deleted and the script halts to prevent incomplete preservation.
 
 **Solution:**
 See [VALIDATION-TROUBLESHOOTING.md](VALIDATION-TROUBLESHOOTING.md) for detailed workarounds including:
